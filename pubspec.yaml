@@ -14,12 +14,19 @@ dependencies:
     sdk: flutter
 
 
-  get: ^4.6.6
-  bottom_navy_bar: ^6.0.0
+  get: ^4.6.5
   smooth_page_indicator: ^1.1.0
   flutter_rating_bar: ^4.0.1
   font_awesome_flutter: ^10.6.0
   animations: ^2.0.8
+  shared_preferences: ^2.0.15
+  image_picker: ^1.1.2
+  uuid: ^4.2.2
+  mailer: ^6.0.1
+  google_sign_in: ^6.1.6
+  sqflite: ^2.3.0
+  path: ^1.8.3
+  path_provider: ^2.1.1
 
 dev_dependencies:
   flutter_lints: ^3.0.1
@@ -32,4 +39,16 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/images/logo.png
+    - assets/images/leaves_bg.jpg
     - assets/images/
+    - assets/images/register.jpg
+    - assets/images/onboarding1.png
+    - assets/images/onboarding2.png
+    - assets/images/onboarding3.png
+    - assets/images/indoor.png
+    - assets/images/outdoor.png
+    - assets/images/pot.png
+    - assets/images/flowers.png
+    - assets/images/trees.png
+    - assets/icons/
