@@ -27,6 +27,8 @@ dependencies:
   sqflite: ^2.3.0
   path: ^1.8.3
   path_provider: ^2.1.1
+  camera: ^0.10.5+9
+  google_mlkit_object_detection: ^0.10.0
 
 dev_dependencies:
   flutter_lints: ^3.0.1
@@ -49,3 +51,4 @@ flutter:
     - assets/images/outdoor.png
     - assets/images/pot.png
     - assets/images/trees.png
+    - assets/ml/

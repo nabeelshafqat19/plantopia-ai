@@ -51,7 +51,7 @@ void main() async {
         GetPage(name: '/login', page: () => const LoginScreen()),
         GetPage(name: '/register', page: () => const RegisterScreen()),
         GetPage(name: '/signup', page: () => const SignupScreen()),
-        GetPage(name: '/home', page: () => const MainScreen()),
+        GetPage(name: '/home', page: () => MainScreen()),
         GetPage(name: '/profile', page: () => const ProfileScreen()),
         GetPage(name: '/admin', page: () => const AdminScreen()),
         GetPage(name: '/checkout', page: () => const CheckoutScreen()),
