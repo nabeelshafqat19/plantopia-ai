@@ -16,6 +16,7 @@ import 'package:e_commerce_flutter/src/controller/plant_controller.dart';
 import 'package:e_commerce_flutter/src/view/screen/admin_screen.dart';
 import 'package:e_commerce_flutter/src/view/screen/checkout_screen.dart';
 import 'package:e_commerce_flutter/src/controller/theme_controller.dart';
+import 'package:e_commerce_flutter/src/controller/order_controller.dart';
 
 void main() async {
   // Ensure Flutter is initialized
@@ -28,6 +29,7 @@ void main() async {
   Get.put(UserAuthController());
   Get.put(PlantController());
   Get.put(ThemeController());
+  Get.put(OrderController());
 
   // Get initial route
   final prefs = await SharedPreferences.getInstance();

@@ -12,16 +12,24 @@ class CartScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        Get.offNamed('/home');
+        Get.offAllNamed('/home');
         return false;
       },
       child: Scaffold(
         appBar: AppBar(
+          backgroundColor: const Color(0xFF184A2C),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Get.offNamed('/home'),
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Get.offAllNamed('/home'),
           ),
-          title: const Text('Shopping Cart'),
+          title: const Text(
+            'Shopping Cart',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           centerTitle: true,
         ),
         body: Obx(() {
@@ -39,8 +47,15 @@ class CartScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: () => Get.offNamed('/home'),
-                    child: const Text('Continue Shopping'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF184A2C),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32, vertical: 16),
+                    ),
+                    onPressed: () => Get.offAllNamed('/home'),
+                    child: const Text('Continue Shopping',
+                        style: TextStyle(fontSize: 16)),
                   ),
                 ],
               ),

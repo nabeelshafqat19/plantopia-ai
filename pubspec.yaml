@@ -41,7 +41,6 @@ flutter:
   assets:
     - assets/images/logo.png
     - assets/images/leaves_bg.jpg
-    - assets/images/
     - assets/images/register.jpg
     - assets/images/onboarding1.png
     - assets/images/onboarding2.png
@@ -49,6 +48,4 @@ flutter:
     - assets/images/indoor.png
     - assets/images/outdoor.png
     - assets/images/pot.png
-    - assets/images/flowers.png
     - assets/images/trees.png
-    - assets/icons/

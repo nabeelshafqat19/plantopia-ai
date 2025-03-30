@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:e_commerce_flutter/src/controller/cart_controller.dart';
 import 'package:e_commerce_flutter/src/controller/user_auth_controller.dart';
+import 'package:e_commerce_flutter/src/controller/order_controller.dart';
+import 'package:e_commerce_flutter/src/model/order.dart';
 import 'dart:html' as html;
 
 class CheckoutScreen extends StatefulWidget {
@@ -19,6 +21,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final _zipController = TextEditingController();
   final CartController cartController = Get.find<CartController>();
   final UserAuthController userController = Get.find<UserAuthController>();
+  final OrderController orderController = Get.find<OrderController>();
   bool _isProcessing = false;
 
   void _sendEmailViaMailto() {
@@ -33,7 +36,7 @@ Subtotal: ₨${(item.price * item.quantity).toStringAsFixed(2)}''';
 Order Details:
 
 Customer Information:
-Name: ${userController.userName}
+Name: ${userController.userName.value}
 
 Shipping Address:
 ${_addressController.text}
@@ -50,7 +53,7 @@ Total Amount: ₨${cartController.total.toStringAsFixed(2)}
       scheme: 'mailto',
       path: 'hopnesscrew@gmail.com',
       query: encodeQueryParameters(<String, String>{
-        'subject': 'New Order from ${userController.userName}',
+        'subject': 'New Order from ${userController.userName.value}',
         'body': body,
       }),
     );
@@ -73,22 +76,42 @@ Total Amount: ₨${cartController.total.toStringAsFixed(2)}
     });
 
     try {
-      _sendEmailViaMailto();
-
-      // Show success message
-      Get.snackbar(
-        'Order Placed',
-        'Your order details have been prepared for email. Please send the email to complete your order.',
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 5),
+      // Create new order
+      final order = Order(
+        userId: userController.userEmail.value,
+        userName: userController.userName.value,
+        userEmail: userController.userEmail.value,
+        address: _addressController.text,
+        city: _cityController.text,
+        state: _stateController.text,
+        zipCode: _zipController.text,
+        items: cartController.items,
+        subtotal: cartController.subtotal,
+        shippingCost: cartController.shippingCost,
+        total: cartController.total,
       );
 
-      // Clear cart and navigate home after delay
-      Future.delayed(const Duration(seconds: 2), () {
-        cartController.clearCart();
-        Get.offNamed('/home');
-      });
+      // Add order to storage
+      final success = await orderController.addOrder(order);
+
+      if (success) {
+        // Show success message
+        Get.snackbar(
+          'Order Placed',
+          'Your order has been placed successfully!',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 5),
+        );
+
+        // Clear cart and navigate home after delay
+        Future.delayed(const Duration(seconds: 2), () {
+          cartController.clearCart();
+          Get.offNamed('/home');
+        });
+      } else {
+        throw Exception('Failed to place order');
+      }
     } catch (e) {
       Get.snackbar(
         'Error',
