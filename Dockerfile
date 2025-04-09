@@ -27,6 +27,9 @@ RUN flutter doctor
 RUN flutter channel stable || true  # Ignore errors if the channel is already stable
 RUN flutter upgrade
 
+# Verify Flutter version
+RUN flutter --version
+
 # Copy the app files to the container
 WORKDIR /app
 COPY . .
