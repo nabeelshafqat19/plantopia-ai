@@ -25,7 +25,9 @@ USER flutteruser
 # Run Flutter commands as non-root
 RUN flutter doctor
 RUN flutter channel stable || true  # Ignore errors if the channel is already stable
-RUN flutter upgrade
+
+# Retry mechanism for flutter upgrade
+RUN for i in 1 2 3; do flutter upgrade && break || sleep 10; done
 
 # Verify Flutter version
 RUN flutter --version
