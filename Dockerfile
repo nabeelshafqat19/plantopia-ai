@@ -15,6 +15,11 @@ ENV PATH="/flutter/bin:${PATH}"
 
 # Create a non-root user
 RUN useradd -ms /bin/bash flutteruser
+
+# Change ownership of the Flutter directory
+RUN chown -R flutteruser:flutteruser /flutter
+
+# Switch to the non-root user
 USER flutteruser
 
 # Run Flutter commands as non-root
