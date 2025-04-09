@@ -12,8 +12,14 @@ RUN git config --global http.postBuffer 524288000
 # Install Flutter
 RUN git clone --depth 1 https://github.com/flutter/flutter.git /flutter
 ENV PATH="/flutter/bin:${PATH}"
+
+# Create a non-root user
+RUN useradd -ms /bin/bash flutteruser
+USER flutteruser
+
+# Run Flutter commands as non-root
 RUN flutter doctor
-RUN flutter channel stable
+RUN flutter channel stable || true  # Ignore errors if the channel is already stable
 RUN flutter upgrade
 
 # Copy the app files to the container
