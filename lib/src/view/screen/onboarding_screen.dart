@@ -17,7 +17,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final List<OnboardingPage> _pages = [
     OnboardingPage(
       image: 'assets/images/onboarding1.png',
-      title: 'Enjoy kro life ko plants ka sath kro enjoy bidu bacha tu apna',
+      title: 'Enjoy your life with Plants',
       subtitle: 'life ko enjoy kro plants ka sath bidu tu apna hi bacha ha bidu',
       description:
           'Discover the best plants for your home and create a natural environment.',
