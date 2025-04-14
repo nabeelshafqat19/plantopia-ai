@@ -50,6 +50,7 @@ steps:
 - task: PowerShell@2
   displayName: 'Trigger Second Pipeline'
   inputs:
+    targetType: 'inline' # Explicitly specify inline script mode
     script: |
       Write-Host "Triggering second pipeline using Azure DevOps REST API..."
       $headers = @{Authorization = "Basic $([convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes('$(AZURE_DEVOPS_USERNAME):$(AZURE_DEVOPS_PAT)')))"}
