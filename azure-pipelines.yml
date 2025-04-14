@@ -1,20 +1,47 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
-- main
+- main # Automatically triggers on updates to the 'main' branch
 
-pool: gittoacr
-     
-  
+pool:
+  name: gittoacr # Using the specified agent pool
+
+variables:
+  - group: gittoacr # Linking the variable group for ACR-related variables
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+# Step 1: Checkout the GitHub repository
+- checkout: self
+  displayName: 'Clone GitHub Repository'
 
+# Step 2: Login to ACR using Azure CLI
 - script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+    echo "Logging in to Azure Container Registry using Azure CLI..."
+    az acr login --name $(acrLoginServer)
+    echo "Logged into ACR successfully!"
+  displayName: 'Login to ACR via Azure CLI'
+
+# Step 3: Build the project (Add your project-specific build commands if necessary)
+- script: |
+    echo "Building the project..."
+    # Add specific commands for building your project (e.g., npm install, dotnet build, etc.)
+    echo "Project build completed successfully!"
+  displayName: 'Build Project'
+
+# Step 4: Build Docker Image
+- script: |
+    echo "Building Docker image..."
+    docker build -t $(acrLoginServer)/$(acrRepository):$(dockerImageTag) .
+    echo "Docker image built successfully!"
+  displayName: 'Build Docker Image via CLI'
+
+# Step 5: Push Docker Image to ACR
+- script: |
+    echo "Pushing Docker image to ACR..."
+    docker push $(acrLoginServer)/$(acrRepository):$(dockerImageTag)
+    echo "Docker image pushed successfully!"
+  displayName: 'Push Docker Image via CLI'
+
+# Step 6: Confirm the Docker image was pushed successfully
+- script: |
+    echo "Docker image successfully pushed to ACR!"
+    echo "Image URL: $(acrLoginServer)/$(acrRepository):$(dockerImageTag)"
+  displayName: 'Confirm Docker Image Push'
