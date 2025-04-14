@@ -3,7 +3,7 @@ FROM debian:latest AS build-env
 
 # Install necessary dependencies
 RUN apt-get update && \
-    apt-get install -y curl git unzip xz-utils libglu1-mesa cmake clang ninja-build pkg-config && \
+    apt-get install -y curl git unzip xz-utils libglu1-mesa cmake clang ninja-build pkg-config ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user
@@ -11,26 +11,30 @@ RUN useradd -ms /bin/bash developer
 USER developer
 WORKDIR /home/developer
 
-# Install Flutter with specific version
+# Install Flutter with a specific version
 RUN git clone -b stable https://github.com/flutter/flutter.git
 ENV PATH="/home/developer/flutter/bin:${PATH}"
 
-# Initialize Flutter
-RUN flutter precache
-RUN flutter doctor --android-licenses || true
-RUN flutter config --no-analytics
-RUN flutter doctor
+# Configure Git and Flutter
+RUN git config --global --add safe.directory /home/developer/flutter && \
+    flutter precache && \
+    flutter doctor --android-licenses || true && \
+    flutter config --no-analytics && \
+    flutter doctor
 
-# Switch back to root for remaining operations
+# Switch back to root for copying app files
 USER root
 WORKDIR /app
 
-# Copy the app files to the container
+# Copy the app files to the container and ensure ownership
 COPY --chown=developer:developer . .
 
+# Switch back to non-root user to run Flutter commands
+USER developer
+
 # Get app dependencies and build for web
-RUN flutter pub get
-RUN flutter build web --release
+RUN flutter pub get && \
+    flutter build web --release
 
 # Stage 2: Create the production environment
 FROM nginx:alpine
