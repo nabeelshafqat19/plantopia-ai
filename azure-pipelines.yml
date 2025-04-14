@@ -47,13 +47,15 @@ steps:
     echo Image URL: $(acrLoginServer).azurecr.io/$(acrRepository):$(dockerImageTag)
   displayName: 'Confirm Docker Image Push'
 
-# Step 7: Trigger the Second Pipeline
-- script: |
-    echo Triggering second pipeline using Azure DevOps REST API...
-    curl -u "$(AZURE_DEVOPS_USERNAME):$(AZURE_DEVOPS_PAT)" `
-         -X POST `
-         -H "Content-Type: application/json" `
-         -d '{"resources": {"repositories": {"self": {"refName": "refs/heads/main"}}}}' `
-         https://dev.azure.com/$(Organization)/ACR%20to%20Webapp/_apis/pipelines/$(pipelineId)/runs?api-version=7.1-preview
-    echo Second pipeline triggered successfully!
+- task: PowerShell@2
   displayName: 'Trigger Second Pipeline'
+  inputs:
+    script: |
+      Write-Host "Triggering second pipeline using Azure DevOps REST API..."
+      $headers = @{Authorization = "Basic $([convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes('$(AZURE_DEVOPS_USERNAME):$(AZURE_DEVOPS_PAT)')))"}
+      $body = '{"resources": {"repositories": {"self": {"refName": "refs/heads/main"}}}}'
+      $url = "https://dev.azure.com/$(Organization)/$(SecondProject)/_apis/pipelines/$(pipelineId)/runs?api-version=7.1-preview"
+
+      $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Post -Body $body -ContentType "application/json"
+
+      Write-Host "Second pipeline triggered successfully!"
