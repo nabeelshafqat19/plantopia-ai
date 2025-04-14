@@ -5,7 +5,8 @@ pool:
   name: gittoacr # Specify the agent pool
 
 variables:
-  - group: gittoacr # Linking the variable group containing ACR-related variables
+  - group: pipelines connector # Reference the first variable group
+  - group: gittoacr
 
 steps:
 # Step 1: Checkout the GitHub repository
@@ -19,7 +20,7 @@ steps:
     echo Logged into ACR successfully!
   displayName: 'Login to ACR via Azure CLI'
 
-# Step 3: Build the project (Windows cmd.exe compatible)
+# Step 3: Build the project
 - script: |
     echo Building the project...
     REM Add specific commands for your project build below
@@ -45,3 +46,14 @@ steps:
     echo Docker image successfully pushed to ACR!
     echo Image URL: $(acrLoginServer).azurecr.io/$(acrRepository):$(dockerImageTag)
   displayName: 'Confirm Docker Image Push'
+
+# Step 7: Trigger the Second Pipeline
+- script: |
+    echo Triggering second pipeline using Azure DevOps REST API...
+    curl -u $(AZURE_DEVOPS_USERNAME):$(AZURE_DEVOPS_PAT) \
+         -X POST \
+         -H "Content-Type: application/json" \
+         -d '{"resources": {"repositories": {"self": {"refName": "refs/heads/main"}}}}' \
+         https://dev.azure.com/$(Organization)/$(SecondProject)/_apis/pipelines/$(pipelineId)/runs?api-version=7.1-preview
+    echo Second pipeline triggered successfully!
+  displayName: 'Trigger Second Pipeline'
