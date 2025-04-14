@@ -6,9 +6,26 @@ RUN apt-get update && \
     apt-get install -y curl git unzip && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Flutter
-RUN git clone https://github.com/flutter/flutter.git /flutter
+# Configure git for better reliability
+RUN git config --global http.postBuffer 524288000 && \
+    git config --global core.compression 0 && \
+    git config --global http.lowSpeedLimit 1000 && \
+    git config --global http.lowSpeedTime 300
+
+# Install Flutter with retry logic and shallow clone
+RUN for i in {1..3}; do \
+        git clone --depth 1 --single-branch https://github.com/flutter/flutter.git /flutter && break || \
+        rm -rf /flutter && sleep 5; \
+    done
+
 ENV PATH="/flutter/bin:${PATH}"
+
+# Precache Flutter dependencies with retry logic
+RUN for i in {1..3}; do \
+        flutter precache && break || \
+        sleep 5; \
+    done
+
 RUN flutter doctor
 RUN flutter channel stable
 RUN flutter upgrade
