@@ -50,10 +50,10 @@ steps:
 # Step 7: Trigger the Second Pipeline
 - script: |
     echo Triggering second pipeline using Azure DevOps REST API...
-    curl -u $(AZURE_DEVOPS_USERNAME):$(AZURE_DEVOPS_PAT) \
-         -X POST \
-         -H "Content-Type: application/json" \
-         -d '{"resources": {"repositories": {"self": {"refName": "refs/heads/main"}}}}' \
-         https://dev.azure.com/$(Organization)/$(SecondProject)/_apis/pipelines/$(pipelineId)/runs?api-version=7.1-preview
+    curl -u "$(AZURE_DEVOPS_USERNAME):$(AZURE_DEVOPS_PAT)" `
+         -X POST `
+         -H "Content-Type: application/json" `
+         -d '{"resources": {"repositories": {"self": {"refName": "refs/heads/main"}}}}' `
+         https://dev.azure.com/$(Organization)/ACR%20to%20Webapp/_apis/pipelines/$(pipelineId)/runs?api-version=7.1-preview
     echo Second pipeline triggered successfully!
   displayName: 'Trigger Second Pipeline'
