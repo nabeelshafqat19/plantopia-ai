@@ -46,30 +46,3 @@ steps:
     echo Docker image successfully pushed to ACR!
     echo Image URL: $(acrLoginServer).azurecr.io/$(acrRepository):$(dockerImageTag)
   displayName: 'Confirm Docker Image Push'
-
-- task: PowerShell@2
-  displayName: 'Trigger Second Pipeline'
-  inputs:
-    targetType: 'inline'
-    script: |
-      Write-Host "Triggering second pipeline using Azure DevOps REST API..."
-      
-      # Build URL and encode it to handle special characters
-      $url = [System.Uri]::EscapeUriString("https://dev.azure.com/$(Organization)/$(SecondProject)/_apis/pipelines/$(pipelineId)/runs?api-version=7.1-preview")
-      
-      # Build Authorization Header
-      $headers = @{
-        Authorization = "Basic $([convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes('$(AZURE_DEVOPS_USERNAME):$(AZURE_DEVOPS_PAT)')))"
-      }
-      
-      # Define the body for the REST API call
-      $body = '{"resources": {"repositories": {"self": {"refName": "refs/heads/main"}}}}'
-
-      # Make the REST API POST request
-      try {
-        $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Post -Body $body -ContentType "application/json"
-        Write-Host "Second pipeline triggered successfully! Response: $($response | ConvertTo-Json -Depth 10)"
-      } catch {
-        Write-Error "Failed to trigger the second pipeline. Error: $_"
-        throw
-      }
