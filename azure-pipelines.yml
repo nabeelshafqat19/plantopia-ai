@@ -15,7 +15,7 @@ steps:
 
 # Step 2: Login to Azure Container Registry (ACR) using Azure CLI
 - script: |
-    echo Logging in to Azure Container Registry using Azure CLI...
+    echo Logging into Azure Container Registry using Azure CLI...
     az acr login --name $(acrLoginServer)
     echo Logged into ACR successfully!
   displayName: 'Login to ACR via Azure CLI'
@@ -46,3 +46,14 @@ steps:
     echo Docker image successfully pushed to ACR!
     echo Image URL: $(acrLoginServer).azurecr.io/$(acrRepository):$(dockerImageTag)
   displayName: 'Confirm Docker Image Push'
+
+# Step 7: Download Pipeline Artifact
+- task: DownloadPipelineArtifact@2
+  displayName: 'Download Build Artifact'
+  inputs:
+    buildType: 'specific'
+    project: '9a4215e6-b1e6-4137-87d4-dd2de44bc3e0'
+    definition: '21'
+    buildVersionToDownload: 'latest'
+    tags: 'latest'
+    targetPath: '$(Pipeline.Workspace)'
