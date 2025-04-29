@@ -17,6 +17,7 @@ import 'package:e_commerce_flutter/src/view/screen/admin_screen.dart';
 import 'package:e_commerce_flutter/src/view/screen/checkout_screen.dart';
 import 'package:e_commerce_flutter/src/controller/theme_controller.dart';
 import 'package:e_commerce_flutter/src/controller/order_controller.dart';
+import 'package:e_commerce_flutter/src/view/screen/image_caption_screen.dart';
 
 void main() async {
   // Ensure Flutter is initialized
@@ -55,6 +56,7 @@ void main() async {
         GetPage(name: '/profile', page: () => const ProfileScreen()),
         GetPage(name: '/admin', page: () => const AdminScreen()),
         GetPage(name: '/checkout', page: () => const CheckoutScreen()),
+        GetPage(name: '/image-caption', page: () => const ImageCaptionScreen()),
       ],
     ),
   );

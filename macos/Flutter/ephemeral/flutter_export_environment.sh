@@ -1,7 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=C:\Users\Nabeel\Downloads\flutter_windows_3.27.2-stable\flutter"
-export "FLUTTER_APPLICATION_PATH=D:\flutter_plantopia"
+export "FLUTTER_ROOT=C:\Users\Personal 3\Downloads\flutter_windows_3.29.3-stable\flutter"
+export "FLUTTER_APPLICATION_PATH=C:\Users\Personal 3\Desktop\New folder\Planttopia"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_BUILD_DIR=build"
 export "FLUTTER_BUILD_NAME=1.0.0"

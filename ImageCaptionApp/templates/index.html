@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Image Caption AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            background-color: #f0fdf4;
+        }
+        h1 {
+            color: #184A2C;
+            margin-bottom: 30px;
+        }
+        form {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        .custom-file-upload {
+            display: inline-block;
+            padding: 12px 24px;
+            cursor: pointer;
+            background-color: #184A2C;
+            color: white;
+            border-radius: 6px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .custom-file-upload:hover {
+            background-color: #0d3320;
+        }
+        button {
+            padding: 12px 24px;
+            background-color: #184A2C;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #0d3320;
+        }
+        #selected-file {
+            margin-top: 10px;
+            color: #666;
+        }
+        #preview-image {
+            display: none;
+            margin-top: 20px;
+            max-width: 100%;
+            border: 2px solid #28a745;
+            border-radius: 8px;
+        }
+        .result {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            margin-top: 30px;
+        }
+        .result p {
+            color: #184A2C;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+            padding: 16px 20px;
+            background-color: #d4edda;
+            border-left: 6px solid #28a745;
+            border-radius: 8px;
+            animation: fadeIn 1s ease-in;
+        }
+        .camera-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #184A2C;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <h1>Image Caption AI</h1>
+    
+    <form method="POST" enctype="multipart/form-data">
+        <div class="camera-icon">📸</div>
+        
+        <label class="custom-file-upload">
+            <input type="file" name="image_file" id="file-input" accept="image/*">
+            Pick Image
+        </label>
+        
+        <div id="selected-file"></div>
+        <img id="preview-image" src="#" alt="Selected Image Preview">
+        
+        <button type="submit" style="margin-top: 20px;">Get Caption</button>
+    </form>
+
+    {% if caption %}
+    <div class="result">
+        <p>{{ caption.split(',')[0] }}</p> <!-- Only show the caption text -->
+    </div>
+    {% endif %}
+
+    <script>
+        // Show selected filename and preview image
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            var file = e.target.files[0];
+            var fileName = file ? file.name : '';
+            document.getElementById('selected-file').textContent = fileName;
+
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function(event) {
+                    var preview = document.getElementById('preview-image');
+                    preview.src = event.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+</html>
