@@ -217,18 +217,9 @@ class DatabaseHelper {
       'name': 'Monstera Deliciosa',
       'description': 'Tropical plant with unique leaf patterns',
       'price': 49.99,
-      'imageUrl': 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
+      'imageUrl':
+          'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
       'category': 'Indoor',
-      'isFavorite': 0,
-    });
-
-    await db.insert('plants', {
-      'id': '2',
-      'name': 'Garden Rose',
-      'description': 'Beautiful flowering plant for your garden',
-      'price': 24.99,
-      'imageUrl': 'https://images.unsplash.com/photo-1589994160839-163cd867cfe8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-      'category': 'Garden',
       'isFavorite': 0,
     });
   }
@@ -311,7 +302,8 @@ class DatabaseHelper {
 
   Future<void> _savePlants(List<Plant> plants) async {
     if (kIsWeb) {
-      final jsonData = json.encode(plants.map((plant) => plant.toJson()).toList());
+      final jsonData =
+          json.encode(plants.map((plant) => plant.toJson()).toList());
       html.window.localStorage[_storageKey] = jsonData;
     }
   }
@@ -320,7 +312,7 @@ class DatabaseHelper {
         Plant(
           id: const Uuid().v4(),
           name: 'Monstera Deliciosa',
-          description: 'Tropical plant with unique leaf patterns',
+          description: 'Tropical plant with unique leaf patterns.',
           price: 49.99,
           imageUrl:
               'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
@@ -329,20 +321,66 @@ class DatabaseHelper {
         Plant(
           id: const Uuid().v4(),
           name: 'Garden Rose',
-          description: 'Beautiful flowering plant for your garden',
+          description: 'Beautiful flowering plant for your garden.',
           price: 24.99,
           imageUrl:
               'https://images.unsplash.com/photo-1589994160839-163cd867cfe8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
           category: 'Garden',
         ),
-         Plant(
+        Plant(
           id: const Uuid().v4(),
-          name: 'Rose',
-          description: 'Beautiful flowering plant for your garden',
-          price: 21.99,
+          name: 'Succulent Aloe Vera',
+          description:
+              'Known for its healing properties, great for indoor spaces.',
+          price: 15.99,
           imageUrl:
-              'https://images.unsplash.com/photo-1589994160839-163cd867cfe8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
+              'https://images.unsplash.com/photo-1632380211596-b96123618ca8?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8YWxvZSUyMHZlcmF8ZW58MHx8MHx8fDA%3D',
+          category: 'Indoor',
+        ),
+        Plant(
+          id: const Uuid().v4(),
+          name: 'Cactus',
+          description: 'Low-maintenance desert plant perfect for sunny spots.',
+          price: 9.99,
+          imageUrl:
+              'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8Q2FjdHVzfGVufDB8fDB8fHww',
+          category: 'Indoor',
+        ),
+        Plant(
+          id: const Uuid().v4(),
+          name: 'Basil',
+          description: 'A herbaceous plant that adds flavor to your dishes.',
+          price: 4.99,
+          imageUrl:
+              'https://images.unsplash.com/photo-1610970884954-4d376ecba53f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8QmFzaWx8ZW58MHx8MHx8fDA%3D',
+          category: 'Indoor',
+        ),
+        Plant(
+          id: const Uuid().v4(),
+          name: 'Orchid',
+          description: 'Elegant and exotic flowers that add color to any room.',
+          price: 39.99,
+          imageUrl:
+              'https://images.unsplash.com/photo-1562133558-4a3906179c67?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8T3JjaGlkfGVufDB8fDB8fHww',
+          category: 'Indoor',
+        ),
+        Plant(
+          id: const Uuid().v4(),
+          name: 'Lavender',
+          description: 'Lavender is a fragrant plant with calming effects.',
+          price: 19.99,
+          imageUrl:
+              'https://images.unsplash.com/photo-1477511801984-4ad318ed9846?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8TGF2ZW5kZXJ8ZW58MHx8MHx8fDA%3D',
           category: 'Garden',
+        ),
+        Plant(
+          id: const Uuid().v4(),
+          name: 'Spider Plant',
+          description: 'An easy-care plant that purifies indoor air.',
+          price: 14.99,
+          imageUrl:
+              'https://images.unsplash.com/photo-1668117653442-dd03862e957f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8U3BpZGVyJTIwUGxhbnR8ZW58MHx8MHx8fDA%3D',
+          category: 'Indoor',
         ),
       ];
 

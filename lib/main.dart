@@ -41,7 +41,7 @@ void main() async {
 
   runApp(
     GetMaterialApp(
-      title: 'Plantstopia',
+      title: 'Planttopia',
       theme: AppTheme.lightAppTheme,
       darkTheme: AppTheme.darkAppTheme,
       themeMode: ThemeMode.system,
