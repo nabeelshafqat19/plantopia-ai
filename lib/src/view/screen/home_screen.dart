@@ -13,8 +13,146 @@ import 'package:e_commerce_flutter/src/controller/user_controller.dart';
 class HomeScreen extends StatelessWidget {
   final PlantController plantController = Get.find<PlantController>();
   final UserController userController = Get.put(UserController());
+  final PageController pageController = PageController(viewportFraction: 0.85);
+  final RxInt currentPage = 0.obs;
 
   HomeScreen({Key? key}) : super(key: key);
+
+  Widget _buildImageSlider() {
+    return Obx(() {
+      final plants = plantController.plants;
+      if (plants.isEmpty) {
+        return const SizedBox.shrink();
+      }
+      return Column(
+        children: [
+          SizedBox(
+            height: 200,
+            child: PageView.builder(
+              controller: pageController,
+              onPageChanged: (index) {
+                currentPage.value = index;
+              },
+              itemCount: plants.length,
+              itemBuilder: (context, index) {
+                final plant = plants[index];
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            ProductDetailScreen(
+                          name: plant.name,
+                          price: plant.price,
+                          image: plant.imageUrl,
+                          description: plant.description,
+                        ),
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
+                          const begin = Offset(0.0, 1.0);
+                          const end = Offset.zero;
+                          const curve = Curves.easeOutCubic;
+                          var tween = Tween(begin: begin, end: end).chain(
+                            CurveTween(curve: curve),
+                          );
+                          var offsetAnimation = animation.drive(tween);
+                          return SlideTransition(
+                              position: offsetAnimation, child: child);
+                        },
+                        transitionDuration: const Duration(milliseconds: 500),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          spreadRadius: 1,
+                          blurRadius: 5,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(15),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Image.network(
+                            plant.imageUrl,
+                            fit: BoxFit.cover,
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.black.withOpacity(0.7),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 20,
+                            left: 20,
+                            right: 20,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  plant.name,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 5),
+                                Text(
+                                  'Rs${plant.price.toStringAsFixed(2)}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: plants.asMap().entries.map((entry) {
+              return Container(
+                width: 8.0,
+                height: 8.0,
+                margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: currentPage.value == entry.key
+                      ? const Color(0xFF184A2C)
+                      : Colors.grey.shade300,
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -140,6 +278,8 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
           ),
+          _buildImageSlider(),
+          const SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(

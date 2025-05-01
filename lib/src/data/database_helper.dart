@@ -1,11 +1,19 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
+import '../model/plant.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:uuid/uuid.dart';
+import 'dart:html' as html;
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   static SharedPreferences? _prefs;
   static const String _usersKey = 'users_data';
+  static const String _storageKey = 'plant_store_data_v3';
   bool _initialized = false;
+  static Database? _database;
 
   factory DatabaseHelper() => _instance;
 
@@ -173,5 +181,208 @@ class DatabaseHelper {
     }
     print('User not found for update');
     return false;
+  }
+
+  Future<Database> get database async {
+    if (_database != null) return _database!;
+    _database = await _initDatabase();
+    return _database!;
+  }
+
+  Future<Database> _initDatabase() async {
+    String path = join(await getDatabasesPath(), 'planttopia.db');
+    return await openDatabase(
+      path,
+      version: 1,
+      onCreate: _onCreate,
+    );
+  }
+
+  Future<void> _onCreate(Database db, int version) async {
+    await db.execute('''
+      CREATE TABLE plants(
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        description TEXT NOT NULL,
+        price REAL NOT NULL,
+        imageUrl TEXT NOT NULL,
+        category TEXT NOT NULL,
+        isFavorite INTEGER NOT NULL DEFAULT 0
+      )
+    ''');
+
+    // Insert default plants
+    await db.insert('plants', {
+      'id': '1',
+      'name': 'Monstera Deliciosa',
+      'description': 'Tropical plant with unique leaf patterns',
+      'price': 49.99,
+      'imageUrl': 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
+      'category': 'Indoor',
+      'isFavorite': 0,
+    });
+
+    await db.insert('plants', {
+      'id': '2',
+      'name': 'Garden Rose',
+      'description': 'Beautiful flowering plant for your garden',
+      'price': 24.99,
+      'imageUrl': 'https://images.unsplash.com/photo-1589994160839-163cd867cfe8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
+      'category': 'Garden',
+      'isFavorite': 0,
+    });
+  }
+
+  Future<List<Plant>> getAllPlants() async {
+    try {
+      if (kIsWeb) {
+        final data = html.window.localStorage[_storageKey];
+        if (data != null && data.isNotEmpty) {
+          final List<dynamic> jsonData = json.decode(data);
+          return jsonData
+              .map((item) => Plant.fromJson(Map<String, dynamic>.from(item)))
+              .toList();
+        }
+      }
+      return _getDefaultPlants();
+    } catch (e) {
+      print('Error getting plants: $e');
+      return _getDefaultPlants();
+    }
+  }
+
+  Future<void> insertPlant(Plant plant) async {
+    try {
+      if (kIsWeb) {
+        final plants = await getAllPlants();
+        plants.add(plant);
+        await _savePlants(plants);
+      }
+    } catch (e) {
+      print('Error inserting plant: $e');
+      throw e;
+    }
+  }
+
+  Future<void> updatePlant(Plant plant) async {
+    try {
+      if (kIsWeb) {
+        final plants = await getAllPlants();
+        final index = plants.indexWhere((p) => p.id == plant.id);
+        if (index != -1) {
+          plants[index] = plant;
+          await _savePlants(plants);
+        }
+      }
+    } catch (e) {
+      print('Error updating plant: $e');
+      throw e;
+    }
+  }
+
+  Future<void> deletePlant(String id) async {
+    try {
+      if (kIsWeb) {
+        final plants = await getAllPlants();
+        plants.removeWhere((plant) => plant.id == id);
+        await _savePlants(plants);
+      }
+    } catch (e) {
+      print('Error deleting plant: $e');
+      throw e;
+    }
+  }
+
+  Future<void> updateFavorite(String id, bool isFavorite) async {
+    try {
+      if (kIsWeb) {
+        final plants = await getAllPlants();
+        final index = plants.indexWhere((p) => p.id == id);
+        if (index != -1) {
+          plants[index] = plants[index].copyWith(isFavorite: isFavorite);
+          await _savePlants(plants);
+        }
+      }
+    } catch (e) {
+      print('Error updating favorite: $e');
+      throw e;
+    }
+  }
+
+  Future<void> _savePlants(List<Plant> plants) async {
+    if (kIsWeb) {
+      final jsonData = json.encode(plants.map((plant) => plant.toJson()).toList());
+      html.window.localStorage[_storageKey] = jsonData;
+    }
+  }
+
+  List<Plant> _getDefaultPlants() => [
+        Plant(
+          id: const Uuid().v4(),
+          name: 'Monstera Deliciosa',
+          description: 'Tropical plant with unique leaf patterns',
+          price: 49.99,
+          imageUrl:
+              'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
+          category: 'Indoor',
+        ),
+        Plant(
+          id: const Uuid().v4(),
+          name: 'Garden Rose',
+          description: 'Beautiful flowering plant for your garden',
+          price: 24.99,
+          imageUrl:
+              'https://images.unsplash.com/photo-1589994160839-163cd867cfe8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
+          category: 'Garden',
+        ),
+         Plant(
+          id: const Uuid().v4(),
+          name: 'Rose',
+          description: 'Beautiful flowering plant for your garden',
+          price: 21.99,
+          imageUrl:
+              'https://images.unsplash.com/photo-1589994160839-163cd867cfe8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
+          category: 'Garden',
+        ),
+      ];
+
+  Future<List<Plant>> searchPlants(String query) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'plants',
+      where: 'name LIKE ? OR description LIKE ?',
+      whereArgs: ['%$query%', '%$query%'],
+    );
+    return List.generate(maps.length, (i) {
+      return Plant(
+        id: maps[i]['id'],
+        name: maps[i]['name'],
+        description: maps[i]['description'],
+        price: maps[i]['price'],
+        imageUrl: maps[i]['imageUrl'],
+        category: maps[i]['category'],
+        isFavorite: maps[i]['isFavorite'] == 1,
+      );
+    });
+  }
+
+  Future<List<Plant>> getPlantsByCategory(String category) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'plants',
+      where: 'category = ?',
+      whereArgs: [category],
+    );
+    return List.generate(maps.length, (i) {
+      return Plant(
+        id: maps[i]['id'],
+        name: maps[i]['name'],
+        description: maps[i]['description'],
+        price: maps[i]['price'],
+        imageUrl: maps[i]['imageUrl'],
+        category: maps[i]['category'],
+        isFavorite: maps[i]['isFavorite'] == 1,
+      );
+    });
   }
 }
