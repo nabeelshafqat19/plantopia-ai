@@ -254,84 +254,87 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       backgroundColor: const Color(0xFFF7F5F8),
-      body: Column(
-        children: [
-          Container(
-            padding: EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top + 16,
-              left: 16,
-              right: 16,
-              bottom: 16,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "Let's find your plants!",
-                          style: TextStyle(
-                            color: Color(0xFF184A2C),
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Obx(
-                          () => Text(
-                            "Welcome back, ${Get.find<UserAuthController>().userName}!",
-                            style: const TextStyle(
-                              color: Color(0xFF5F927A),
-                              fontSize: 16,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).padding.top + 16,
+                left: 16,
+                right: 16,
+                bottom: 16,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Let's find your plants!",
+                            style: TextStyle(
+                              color: Color(0xFF184A2C),
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-              ],
+                          const SizedBox(height: 4),
+                          Obx(
+                            () => Text(
+                              "Welcome back, ${Get.find<UserAuthController>().userName}!",
+                              style: const TextStyle(
+                                color: Color(0xFF5F927A),
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                ],
+              ),
             ),
-          ),
-          _buildImageSlider(),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                _buildChip('All', plantController),
-                _buildChip('Indoor', plantController),
-                _buildChip('Outdoor', plantController),
-                _buildChip('Garden', plantController),
-              ],
+            _buildImageSlider(),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  _buildChip('All', plantController),
+                  _buildChip('Indoor', plantController),
+                  _buildChip('Outdoor', plantController),
+                  _buildChip('Garden', plantController),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: Obx(() {
-              final plants = plantController.filteredPlants;
-              return GridView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.68,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                ),
-                itemCount: plants.length,
-                itemBuilder: (context, index) {
-                  final plant = plants[index];
-                  return _buildPlantCard(plant, context);
-                },
-              );
-            }),
-          ),
-        ],
+            const SizedBox(height: 16),
+            Container(
+              height: MediaQuery.of(context).size.height * 0.5,
+              child: Obx(() {
+                final plants = plantController.filteredPlants;
+                return GridView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.68,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                  ),
+                  itemCount: plants.length,
+                  itemBuilder: (context, index) {
+                    final plant = plants[index];
+                    return _buildPlantCard(plant, context);
+                  },
+                );
+              }),
+            ),
+          ],
+        ),
       ),
     );
   }
