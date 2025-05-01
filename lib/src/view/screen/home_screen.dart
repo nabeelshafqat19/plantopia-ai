@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:e_commerce_flutter/src/view/screen/product_detail_screen.dart';
 import 'package:e_commerce_flutter/src/controller/user_auth_controller.dart';
 import 'package:e_commerce_flutter/src/controller/plant_controller.dart';
@@ -9,14 +10,54 @@ import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:convert';
 import 'package:e_commerce_flutter/src/controller/user_controller.dart';
+import 'dart:async';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({Key? key}) : super(key: key);
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   final PlantController plantController = Get.find<PlantController>();
   final UserController userController = Get.put(UserController());
   final PageController pageController = PageController(viewportFraction: 0.85);
-  final RxInt currentPage = 0.obs;
+  final RxInt currentIndex = 0.obs;
+  Timer? _timer;
 
-  HomeScreen({Key? key}) : super(key: key);
+  @override
+  void initState() {
+    super.initState();
+    _startAutoPlay();
+    // Initialize controllers in initState if not already initialized
+    if (!Get.isRegistered<PlantController>()) {
+      Get.put(PlantController());
+    }
+    if (!Get.isRegistered<UserAuthController>()) {
+      Get.put(UserAuthController());
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    pageController.dispose();
+    super.dispose();
+  }
+
+  void _startAutoPlay() {
+    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (plantController.plants.isNotEmpty) {
+        final nextPage = (currentIndex.value + 1) % plantController.plants.length;
+        pageController.animateToPage(
+          nextPage,
+          duration: const Duration(milliseconds: 800),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
 
   Widget _buildImageSlider() {
     return Obx(() {
@@ -24,107 +65,99 @@ class HomeScreen extends StatelessWidget {
       if (plants.isEmpty) {
         return const SizedBox.shrink();
       }
+
       return Column(
         children: [
           SizedBox(
-            height: 200,
+            height: 250,
             child: PageView.builder(
               controller: pageController,
-              onPageChanged: (index) {
-                currentPage.value = index;
-              },
+              onPageChanged: (index) => currentIndex.value = index,
               itemCount: plants.length,
               itemBuilder: (context, index) {
                 final plant = plants[index];
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            ProductDetailScreen(
+                return AnimatedBuilder(
+                  animation: pageController,
+                  builder: (context, child) {
+                    double value = 1.0;
+                    if (pageController.position.haveDimensions) {
+                      value = pageController.page! - index;
+                      value = (1 - (value.abs() * 0.3)).clamp(0.85, 1.0);
+                    }
+                    return Transform.scale(
+                      scale: value,
+                      child: child,
+                    );
+                  },
+                  child: GestureDetector(
+                    onTap: () => Get.to(() => ProductDetailScreen(
                           name: plant.name,
                           price: plant.price,
                           image: plant.imageUrl,
                           description: plant.description,
-                        ),
-                        transitionsBuilder:
-                            (context, animation, secondaryAnimation, child) {
-                          const begin = Offset(0.0, 1.0);
-                          const end = Offset.zero;
-                          const curve = Curves.easeOutCubic;
-                          var tween = Tween(begin: begin, end: end).chain(
-                            CurveTween(curve: curve),
-                          );
-                          var offsetAnimation = animation.drive(tween);
-                          return SlideTransition(
-                              position: offsetAnimation, child: child);
-                        },
-                        transitionDuration: const Duration(milliseconds: 500),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 8),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          spreadRadius: 1,
-                          blurRadius: 5,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(15),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          Image.network(
-                            plant.imageUrl,
-                            fit: BoxFit.cover,
+                        )),
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 10),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            spreadRadius: 1,
+                            blurRadius: 5,
+                            offset: const Offset(0, 3),
                           ),
-                          Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  Colors.transparent,
-                                  Colors.black.withOpacity(0.7),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(15),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Image.network(
+                              plant.imageUrl,
+                              fit: BoxFit.cover,
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.transparent,
+                                    Colors.black.withOpacity(0.7),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              bottom: 20,
+                              left: 20,
+                              right: 20,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    plant.name,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Rs${plant.price.toStringAsFixed(2)}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
-                          ),
-                          Positioned(
-                            bottom: 20,
-                            left: 20,
-                            right: 20,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  plant.name,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 5),
-                                Text(
-                                  'Rs${plant.price.toStringAsFixed(2)}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -132,23 +165,18 @@ class HomeScreen extends StatelessWidget {
               },
             ),
           ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: plants.asMap().entries.map((entry) {
-              return Container(
-                width: 8.0,
-                height: 8.0,
-                margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: currentPage.value == entry.key
-                      ? const Color(0xFF184A2C)
-                      : Colors.grey.shade300,
+          const SizedBox(height: 20),
+          Obx(() => SmoothPageIndicator(
+                controller: pageController,
+                count: plants.length,
+                effect: ExpandingDotsEffect(
+                  activeDotColor: const Color(0xFF184A2C),
+                  dotColor: Colors.grey.shade300,
+                  dotHeight: 8,
+                  dotWidth: 8,
+                  expansionFactor: 4,
                 ),
-              );
-            }).toList(),
-          ),
+              )),
         ],
       );
     });
@@ -156,14 +184,6 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Initialize controllers in build method if not already initialized
-    if (!Get.isRegistered<PlantController>()) {
-      Get.put(PlantController());
-    }
-    if (!Get.isRegistered<UserAuthController>()) {
-      Get.put(UserAuthController());
-    }
-
     final userAuthController = Get.find<UserAuthController>();
 
     return Scaffold(
