@@ -24,6 +24,7 @@ class _AdminScreenState extends State<AdminScreen>
   final _dbHelper = DatabaseHelper();
   final RxBool isLoading = false.obs;
   final RxList<Map<String, dynamic>> users = <Map<String, dynamic>>[].obs;
+  final RxInt currentTabIndex = 0.obs;
 
   // Form controllers
   final _formKey = GlobalKey<FormState>();
@@ -40,6 +41,9 @@ class _AdminScreenState extends State<AdminScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+    _tabController.addListener(() {
+      currentTabIndex.value = _tabController.index;
+    });
     _loadUsers();
   }
 
@@ -104,7 +108,7 @@ class _AdminScreenState extends State<AdminScreen>
     } else {
       _nameController.clear();
       _emailController.clear();
-      _passwordController.clear();
+      _passwordController.text = '';
     }
 
     Get.dialog(
@@ -296,6 +300,7 @@ class _AdminScreenState extends State<AdminScreen>
                   decoration: const InputDecoration(
                     labelText: 'Price',
                     border: OutlineInputBorder(),
+                    prefixText: 'Rs',
                   ),
                   keyboardType: TextInputType.number,
                   validator: (value) {
@@ -346,6 +351,10 @@ class _AdminScreenState extends State<AdminScreen>
             child: const Text('Cancel'),
           ),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF184A2C),
+              foregroundColor: Colors.white,
+            ),
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
                 final newPlant = Plant(
@@ -406,7 +415,10 @@ class _AdminScreenState extends State<AdminScreen>
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
             onPressed: () => Get.back(result: true),
             child: const Text('Delete'),
           ),
@@ -420,17 +432,17 @@ class _AdminScreenState extends State<AdminScreen>
         if (success) {
           Get.snackbar(
             'Success',
-            'Item deleted successfully',
+            'Plant deleted successfully',
             backgroundColor: Colors.green,
             colorText: Colors.white,
           );
         } else {
-          throw Exception('Failed to delete item');
+          throw Exception('Failed to delete plant');
         }
       } catch (e) {
         Get.snackbar(
           'Error',
-          'Failed to delete item: $e',
+          'Failed to delete plant: $e',
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
@@ -456,114 +468,164 @@ class _AdminScreenState extends State<AdminScreen>
           controller: _tabController,
           isScrollable: true,
           tabs: const [
-            Tab(text: 'Orders'),
-            Tab(text: 'Delivery'),
+            Tab(text: 'Plants'),
             Tab(text: 'Users'),
-            Tab(text: 'Items'),
+            Tab(text: 'Orders'),
+            Tab(text: 'Analytics'),
           ],
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
           indicatorColor: Colors.white,
         ),
       ),
+      floatingActionButton: Obx(() => currentTabIndex.value == 0
+          ? FloatingActionButton(
+              onPressed: () => _showAddItemDialog(),
+              backgroundColor: const Color(0xFF184A2C),
+              child: const Icon(Icons.add),
+            )
+          : const SizedBox.shrink()),
       body: TabBarView(
         controller: _tabController,
         children: [
-          // Orders Tab
-          _buildOrdersTab(),
-          // Delivery Tab
-          _buildDeliveryTab(),
+          // Plants Tab
+          _buildPlantsTab(),
           // Users Tab
           _buildUsersTab(),
-          // Items Tab
-          _buildItemsTab(),
+          // Orders Tab
+          _buildOrdersTab(),
+          // Analytics Tab
+          _buildAnalyticsTab(),
         ],
       ),
     );
   }
 
-  Widget _buildOrdersTab() {
-    return Column(
-      children: [
-        Container(
+  Widget _buildPlantsTab() {
+    return Obx(() => GridView.builder(
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                spreadRadius: 1,
-                blurRadius: 5,
-                offset: const Offset(0, 3),
-              ),
-            ],
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 0.68,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
           ),
-          child: const Text(
-            'Manage Orders',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF184A2C),
-            ),
-          ),
-        ),
-        Expanded(
-          child: Obx(
-            () => ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _orderController.orders.length,
-              itemBuilder: (context, index) {
-                final order = _orderController.orders[index];
-                return _buildOrderCard(order);
-              },
-            ),
-          ),
-        ),
-      ],
-    );
+          itemCount: _plantController.plants.length,
+          itemBuilder: (context, index) {
+            final plant = _plantController.plants[index];
+            return _buildPlantCard(plant);
+          },
+        ));
   }
 
-  Widget _buildDeliveryTab() {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                spreadRadius: 1,
-                blurRadius: 5,
-                offset: const Offset(0, 3),
+  Widget _buildPlantCard(Plant plant) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Expanded(
+            flex: 5,
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
               ),
-            ],
-          ),
-          child: const Text(
-            'Track Deliveries',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF184A2C),
+              child: Image.network(
+                plant.imageUrl,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: Colors.grey[200],
+                    child: const Icon(
+                      Icons.image_not_supported,
+                      size: 40,
+                      color: Colors.grey,
+                    ),
+                  );
+                },
+              ),
             ),
           ),
-        ),
-        Expanded(
-          child: Obx(
-            () => ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _orderController
-                  .getOrdersByStatus(OrderStatus.shipped)
-                  .length,
-              itemBuilder: (context, index) {
-                final order = _orderController
-                    .getOrdersByStatus(OrderStatus.shipped)[index];
-                return _buildOrderCard(order);
-              },
+          Expanded(
+            flex: 4,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        plant.name,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF184A2C),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Rs${plant.price.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF184A2C),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE8F3E9),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          plant.category,
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: Color(0xFF184A2C),
+                          ),
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit, size: 20),
+                            onPressed: () => _showAddItemDialog(plant),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(Icons.delete, size: 20),
+                            onPressed: () => _deletePlant(plant),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -639,7 +701,7 @@ class _AdminScreenState extends State<AdminScreen>
     );
   }
 
-  Widget _buildItemsTab() {
+  Widget _buildOrdersTab() {
     return Column(
       children: [
         Container(
@@ -655,92 +717,23 @@ class _AdminScreenState extends State<AdminScreen>
               ),
             ],
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Manage Items',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF184A2C),
-                ),
-              ),
-              ElevatedButton.icon(
-                onPressed: () => _showAddItemDialog(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF184A2C),
-                ),
-                icon: const Icon(Icons.add),
-                label: const Text('Add Item'),
-              ),
-            ],
+          child: const Text(
+            'Manage Orders',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF184A2C),
+            ),
           ),
         ),
         Expanded(
           child: Obx(
-            () => GridView.builder(
+            () => ListView.builder(
               padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.75,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-              ),
-              itemCount: _plantController.plants.length,
+              itemCount: _orderController.orders.length,
               itemBuilder: (context, index) {
-                final plant = _plantController.plants[index];
-                return Card(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AspectRatio(
-                        aspectRatio: 1,
-                        child: Image.network(
-                          plant.imageUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              const Center(child: Icon(Icons.error)),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              plant.name,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                            Text(
-                              '₨${plant.price.toStringAsFixed(2)}',
-                              style: const TextStyle(
-                                color: Color(0xFF184A2C),
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.edit),
-                                  onPressed: () => _showAddItemDialog(plant),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () => _deletePlant(plant),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
+                final order = _orderController.orders[index];
+                return _buildOrderCard(order);
               },
             ),
           ),
@@ -859,5 +852,10 @@ class _AdminScreenState extends State<AdminScreen>
       case OrderStatus.cancelled:
         return Colors.red;
     }
+  }
+
+  Widget _buildAnalyticsTab() {
+    // Implementation of _buildAnalyticsTab method
+    return Container(); // Placeholder, actual implementation needed
   }
 }

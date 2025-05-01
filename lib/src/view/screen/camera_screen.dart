@@ -32,7 +32,7 @@ class _CameraScreenState extends State<CameraScreen> {
       ui.platformViewRegistry.registerViewFactory(
         'flask-html',
         (int viewId) => html.IFrameElement()
-          ..src = 'http://127.0.0.1:5000/'
+          ..src = 'https://dceb-74-235-137-163.ngrok-free.app'
           ..style.border = 'none'
           ..style.width = '100%'
           ..style.height = '100vh'
@@ -77,7 +77,7 @@ class _CameraScreenState extends State<CameraScreen> {
       final base64Image = base64Encode(bytes);
 
       final response = await http.post(
-        Uri.parse('https://2a76-74-235-137-163.ngrok-free.app'),
+        Uri.parse('https://dceb-74-235-137-163.ngrok-free.app'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
