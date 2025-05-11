@@ -4,8 +4,7 @@ trigger:
 pool:
   name: gittoacr # Specify the agent pool
 
-variables:
-  - group: pipelines connector # Reference the first variable group
+variables: # Reference the first variable group
   - group: gittoacr
 
 steps:
