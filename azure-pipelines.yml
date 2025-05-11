@@ -22,6 +22,8 @@ steps:
 - script: |
     echo Logging into Azure Container Registry using Azure CLI...
     "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" acr login --name $(acrLoginServer)
+    echo Logging into ACR using username and password...
+    docker login $(acrLoginServer).azurecr.io -u $(acrUsername) -p $(acrPassword)
     echo Logged into ACR successfully!
   displayName: 'Login to ACR via Azure CLI (Full Path)'
 
