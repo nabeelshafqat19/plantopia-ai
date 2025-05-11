@@ -2,7 +2,7 @@ trigger:
 - main # Automatically triggers on updates to the 'main' branch
 
 pool:
-  name: gittoacr # Specify the agent pool
+  name: gittoacr # Using your self-hosted agent pool
 
 variables: # Reference the first variable group
   - group: gittoacr
@@ -12,35 +12,41 @@ steps:
 - checkout: self
   displayName: 'Clone GitHub Repository'
 
-# Step 2: Login to Azure Container Registry (ACR) using Azure CLI
+# Step 2: Print PATH to help debug environment visibility
+- script: |
+    echo Current PATH is:
+    echo %PATH%
+  displayName: 'Show System PATH for Debugging'
+
+# Step 3: Login to Azure Container Registry (ACR) using full path to Azure CLI
 - script: |
     echo Logging into Azure Container Registry using Azure CLI...
-    az acr login --name $(acrLoginServer)
+    "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" acr login --name $(acrLoginServer)
     echo Logged into ACR successfully!
-  displayName: 'Login to ACR via Azure CLI'
+  displayName: 'Login to ACR via Azure CLI (Full Path)'
 
-# Step 3: Build the project
+# Step 4: Build the project
 - script: |
     echo Building the project...
     REM Add specific commands for your project build below
     echo Project build completed successfully!
   displayName: 'Build Project'
 
-# Step 4: Build Docker Image
+# Step 5: Build Docker Image
 - script: |
     echo Building Docker image...
     docker build -t $(acrLoginServer).azurecr.io/$(acrRepository):$(dockerImageTag) .
     echo Docker image built successfully!
   displayName: 'Build Docker Image via CLI'
 
-# Step 5: Push Docker Image to ACR
+# Step 6: Push Docker Image to ACR
 - script: |
     echo Pushing Docker image to ACR...
     docker push $(acrLoginServer).azurecr.io/$(acrRepository):$(dockerImageTag)
     echo Docker image pushed successfully!
   displayName: 'Push Docker Image via CLI'
 
-# Step 6: Confirm the Docker image was pushed successfully
+# Step 7: Confirm the Docker image was pushed successfully
 - script: |
     echo Docker image successfully pushed to ACR!
     echo Image URL: $(acrLoginServer).azurecr.io/$(acrRepository):$(dockerImageTag)
