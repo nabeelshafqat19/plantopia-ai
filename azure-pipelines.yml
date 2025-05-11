@@ -19,13 +19,13 @@ steps:
   displayName: 'Show System PATH for Debugging'
 
 # Step 3: Login to Azure Container Registry (ACR) using full path to Azure CLI
+# Step 3: Login to Azure Container Registry (ACR) using Docker only
 - script: |
-    echo Logging into Azure Container Registry using Azure CLI...
-    "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" acr login --name $(acrLoginServer)
     echo Logging into ACR using username and password...
-    docker login $(acrLoginServer) -u $(acrUsername) -p $(acrPassword)
+    docker login $(acrLoginServer).azurecr.io -u $(acrUsername) -p $(acrPassword)
     echo Logged into ACR successfully!
-  displayName: 'Login to ACR via Azure CLI (Full Path)'
+  displayName: 'Login to ACR via Docker CLI'
+
 
 # Step 4: Build the project
 - script: |
