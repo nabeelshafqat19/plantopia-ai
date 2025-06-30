@@ -7,7 +7,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y git wget xz-utils
 
 # Download and extract Flutter SDK
-RUN wget https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.19.6-stable.tar.xz -O /tmp/flutter.tar.xz \
+RUN wget https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.32.5-stable.tar.xz -O /tmp/flutter.tar.xz \
     && mkdir /flutter \
     && tar xf /tmp/flutter.tar.xz -C /flutter --strip-components=1 \
     && rm /tmp/flutter.tar.xz
