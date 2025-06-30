@@ -16,6 +16,9 @@ ENV PATH="/flutter/bin:/flutter/bin/cache/dart-sdk/bin:${PATH}"
 
 COPY . .
 
+# Add safe directory for git to avoid dubious ownership error
+RUN git config --global --add safe.directory /flutter
+
 RUN flutter config --enable-web
 RUN flutter pub get
 RUN flutter build web
