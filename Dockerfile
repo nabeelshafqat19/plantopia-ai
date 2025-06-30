@@ -14,6 +14,7 @@ RUN git clone https://github.com/flutter/flutter.git $FLUTTER_HOME
 RUN flutter channel stable
 RUN flutter upgrade
 RUN flutter doctor
+RUN flutter config --enable-web  # ✅ Enable web support
 
 # Set working directory and copy project
 WORKDIR /app
@@ -32,11 +33,7 @@ RUN rm -rf /usr/share/nginx/html/*
 # Copy built web files
 COPY --from=build-env /app/build/web /usr/share/nginx/html
 
-# Optional: if you have a custom nginx.conf, copy it
-# COPY nginx.conf /etc/nginx/conf.d/default.conf
-
 # Expose port 80 for Azure
 EXPOSE 80
 
-# Start NGINX
 CMD ["nginx", "-g", "daemon off;"]
