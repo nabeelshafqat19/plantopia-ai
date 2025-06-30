@@ -1,42 +1,37 @@
-# -------- Stage 1: Build the Flutter web app --------
-FROM debian:bullseye AS build-env
+# Build stage: Flutter web build
+FROM debian:bullseye-slim AS build
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    curl wget unzip xz-utils zip libglu1-mesa bash ca-certificates && \
-    rm -rf /var/lib/apt/lists/*
+WORKDIR /app
 
-# Install Flutter (using tarball for reliability)
-ENV FLUTTER_HOME=/flutter
-ENV PATH="$FLUTTER_HOME/bin:$PATH"
+# Install dependencies
+RUN apt-get update && apt-get install -y git wget xz-utils
 
+# Download and extract Flutter SDK
 RUN wget https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.19.6-stable.tar.xz -O /tmp/flutter.tar.xz \
     && mkdir /flutter \
     && tar xf /tmp/flutter.tar.xz -C /flutter --strip-components=1 \
     && rm /tmp/flutter.tar.xz
 
-# Set working directory and copy project
-WORKDIR /app
+ENV PATH="/flutter/bin:/flutter/bin/cache/dart-sdk/bin:${PATH}"
+
 COPY . .
 
-# Get packages and build
+RUN flutter config --enable-web
 RUN flutter pub get
-RUN flutter build web --release
+RUN flutter build web
 
-# -------- Stage 2: Serve with NGINX --------
+# Serve stage: Nginx
 FROM nginx:alpine
 
-# Remove default NGINX content
+# Remove default nginx website
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copy built web files
-COPY --from=build-env /app/build/web /usr/share/nginx/html
+# Copy built web app from build stage
+COPY --from=build /app/build/web /usr/share/nginx/html
 
-# Copy custom nginx.conf
+# Copy custom nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port 80 for Azure
 EXPOSE 80
 
-# Start NGINX
 CMD ["nginx", "-g", "daemon off;"] 
