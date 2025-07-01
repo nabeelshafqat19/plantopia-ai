@@ -2,56 +2,47 @@ trigger:
 - main # Automatically triggers on updates to the 'main' branch
 
 pool:
-  name: gittoacr # Using your self-hosted agent pool
+  name: gittoacr # Use your self-hosted agent pool
 
-variables: # Reference the first variable group
+variables:
+  - group: pipelines connector
   - group: gittoacr
 
 steps:
-# Step 1: Checkout the GitHub repository
+
+# Step 1: Checkout the repo
 - checkout: self
   displayName: 'Clone GitHub Repository'
 
-# Step 2: Print PATH to help debug environment visibility
+# Step 2: Debug current directory and list files (helps troubleshoot missing Dockerfile)
 - script: |
-    echo Current PATH is:
-    echo %PATH%
-  displayName: 'Show System PATH for Debugging'
+    echo Current directory:
+    cd
+    echo Listing files in root:
+    dir
+  displayName: 'Debug: Check working directory and files'
 
-# Step 3: Login to Azure Container Registry (ACR) using full path to Azure CLI
-# Step 3: Login to Azure Container Registry (ACR) using Docker only
+# Step 3: Login to Azure Container Registry
 - script: |
-    echo Logging into ACR using username and password...
-    docker login $(acrLoginServer).azurecr.io -u $(acrUsername) -p $(acrPassword)
-    echo Logged into ACR successfully!
-  displayName: 'Login to ACR via Docker CLI'
-
+    echo Logging into ACR...
+    az acr login --name $(acrLoginServer)
+  displayName: 'Login to ACR via Azure CLI'
 
 # Step 4: Build Docker Image
 - script: |
     echo Building Docker image...
     docker build -t $(acrLoginServer).azurecr.io/$(acrRepository):$(dockerImageTag) .
-    echo Docker image built successfully!
   displayName: 'Build Docker Image via CLI'
   workingDirectory: $(Build.SourcesDirectory)
 
-
-# Step 5: Build Docker Image
-- script: |
-    echo Building Docker image...
-    docker build -t $(acrLoginServer).azurecr.io/$(acrRepository):$(dockerImageTag) .
-    echo Docker image built successfully!
-  displayName: 'Build Docker Image via CLI'
-
-# Step 6: Push Docker Image to ACR
+# Step 5: Push Docker Image to ACR
 - script: |
     echo Pushing Docker image to ACR...
     docker push $(acrLoginServer).azurecr.io/$(acrRepository):$(dockerImageTag)
-    echo Docker image pushed successfully!
-  displayName: 'Push Docker Image via CLI'
+  displayName: 'Push Docker Image to ACR'
 
-# Step 7: Confirm the Docker image was pushed successfully
+# Step 6: Confirm the Docker image URL
 - script: |
-    echo Docker image successfully pushed to ACR!
-    echo Image URL: $(acrLoginServer).azurecr.io/$(acrRepository):$(dockerImageTag)
+    echo Docker image successfully pushed!
+    echo Image: $(acrLoginServer).azurecr.io/$(acrRepository):$(dockerImageTag)
   displayName: 'Confirm Docker Image Push'
