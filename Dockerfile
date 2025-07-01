@@ -33,8 +33,8 @@ COPY . .
 # Get pub packages
 RUN flutter pub get
 
-# Build Flutter web app
-RUN flutter build web --release
+# Build Flutter web app with verbose logging
+RUN flutter build web --release --verbose # <--- Add --verbose here
 
 # -------- Stage 2: Serve with NGINX --------
 FROM nginx:alpine
