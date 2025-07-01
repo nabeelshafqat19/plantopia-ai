@@ -27,12 +27,14 @@ steps:
   displayName: 'Login to ACR via Docker CLI'
 
 
-# Step 4: Build the project
+# Step 4: Build Docker Image
 - script: |
-    echo Building the project...
-    REM Add specific commands for your project build below
-    echo Project build completed successfully!
-  displayName: 'Build Project'
+    echo Building Docker image...
+    docker build -t $(acrLoginServer).azurecr.io/$(acrRepository):$(dockerImageTag) .
+    echo Docker image built successfully!
+  displayName: 'Build Docker Image via CLI'
+  workingDirectory: $(Build.SourcesDirectory)
+
 
 # Step 5: Build Docker Image
 - script: |
